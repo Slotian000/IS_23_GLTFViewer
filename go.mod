@@ -1,4 +1,4 @@
-module openglproject
+module openGL
 
 go 1.19
 

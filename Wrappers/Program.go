@@ -3,30 +3,30 @@ package Wrappers
 import (
 	"errors"
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"strings"
 )
 
 type Program struct {
-	handle uint32
+	ID uint32
+}
+
+func NewProgram(shaders ...Shader) (Program, error) {
+	program := Program{ID: gl.CreateProgram()}
+
+	for _, shader := range shaders {
+		gl.AttachShader(program.ID, shader.ID)
+	}
+	gl.LinkProgram(program.ID)
+
+	var status, length int32
+	if gl.GetProgramiv(program.ID, gl.LINK_STATUS, &status); status == gl.FALSE {
+		gl.GetProgramiv(program.ID, gl.INFO_LOG_LENGTH, &length)
+		infoLog := make([]byte, length)
+		gl.GetProgramInfoLog(program.ID, length, nil, &infoLog[0])
+		return Program{}, errors.New(string(infoLog))
+	}
+	return Program{ID: program.ID}, nil
 }
 
 func (p *Program) Use() {
-	gl.UseProgram(p.handle)
-}
-
-func New(shaders ...Shader) (program Program, err error) {
-	program.handle = gl.CreateProgram()
-	for _, shader := range shaders {
-		gl.AttachShader(program.handle, shader.handle)
-		shader.Delete()
-	}
-	gl.LinkProgram(program.handle)
-
-	var success int32 = 0
-	if gl.GetShaderiv(program.handle, gl.LINK_STATUS, &success); success != 0 {
-		infoLog := strings.Repeat("\x00", 512)
-		gl.GetShaderInfoLog(program.handle, 512, nil, gl.Str(infoLog))
-		err = errors.New("PROGRAM::LINKING_FAILURE")
-	}
-	return
+	gl.UseProgram(p.ID)
 }
