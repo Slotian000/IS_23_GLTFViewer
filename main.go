@@ -80,7 +80,7 @@ func loop(window *glfw.Window) {
 		Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
 	}
 
-	VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
+	VAO := Wrappers.NewVAO(vertices, true, gl.STATIC_DRAW, attributes...)
 
 	/*
 		gl.VertexAttribPointerWithOffset(2, 2, gl.FLOAT, false, 8*4, 6*4)
@@ -115,11 +115,11 @@ func loop(window *glfw.Window) {
 		program.Use()
 		VAO.Bind()
 
-		gl.DrawArrays(gl.TRIANGLES, 0, 6)
+		//gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
 		//gl.BindTexture(gl.TEXTURE_2D, texture)
 		//gl.BindVertexArray(VAO)
-		//gl.DrawElementsWithOffset(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
+		gl.DrawElementsWithOffset(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
 		//
 
 		window.SwapBuffers()
