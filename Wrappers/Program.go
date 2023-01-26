@@ -9,6 +9,10 @@ type Program struct {
 	ID uint32
 }
 
+func (p *Program) Use() {
+	gl.UseProgram(p.ID)
+}
+
 func NewProgram(shaders ...Shader) (Program, error) {
 	program := Program{ID: gl.CreateProgram()}
 
@@ -25,8 +29,4 @@ func NewProgram(shaders ...Shader) (Program, error) {
 		return Program{}, errors.New(string(infoLog))
 	}
 	return Program{ID: program.ID}, nil
-}
-
-func (p *Program) Use() {
-	gl.UseProgram(p.ID)
 }

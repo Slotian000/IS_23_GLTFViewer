@@ -80,34 +80,8 @@ func loop(window *glfw.Window) {
 		Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
 	}
 
-	VAO := Wrappers.NewVAO(vertices, true, gl.STATIC_DRAW, attributes...)
+	VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
 
-	/*
-		gl.VertexAttribPointerWithOffset(2, 2, gl.FLOAT, false, 8*4, 6*4)
-		gl.EnableVertexAttribArray(2)
-
-			var texture uint32
-
-			gl.GenTextures(1, &texture)
-			gl.BindTexture(gl.TEXTURE_2D, texture)
-
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
-
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-			imgFile, _ := os.Open("Sources/bricks.bmp")
-			defer imgFile.Close()
-
-			img, _, err := image.Decode(imgFile)
-			pix := img.(*image.NRGBA).Pix
-
-			width, height := img.Bounds().Max.X, img.Bounds().Max.Y
-			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, int32(width), int32(height), 0, gl.RGB, gl.UNSIGNED_BYTE, unsafe.Pointer(&pix))
-
-
-	*/
 	for !window.ShouldClose() {
 		gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -115,12 +89,7 @@ func loop(window *glfw.Window) {
 		program.Use()
 		VAO.Bind()
 
-		//gl.DrawArrays(gl.TRIANGLES, 0, 6)
-
-		//gl.BindTexture(gl.TEXTURE_2D, texture)
-		//gl.BindVertexArray(VAO)
-		gl.DrawElementsWithOffset(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
-		//
+		gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
 		window.SwapBuffers()
 		glfw.PollEvents()

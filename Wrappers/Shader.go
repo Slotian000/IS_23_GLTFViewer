@@ -10,15 +10,22 @@ type Shader struct {
 	ID uint32
 }
 
-func NewShaderFromFile(path string, shaderType uint32) (Shader, error) {
-	shader := Shader{ID: gl.CreateShader(shaderType)}
+func (s *Shader) Delete() {
+	gl.DeleteShader(s.ID)
+}
 
-	file, err := os.ReadFile(path)
+func NewShaderFromFile(path string, shaderType uint32) (Shader, error) {
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		return Shader{}, err
 	}
+	return NewShader(string(raw), shaderType)
+}
 
-	source, free := gl.Strs(string(file) + " \x00")
+func NewShader(raw string, shaderType uint32) (Shader, error) {
+	shader := Shader{ID: gl.CreateShader(shaderType)}
+
+	source, free := gl.Strs(raw + " \x00")
 	defer free()
 
 	gl.ShaderSource(shader.ID, 1, source, nil)
@@ -33,8 +40,4 @@ func NewShaderFromFile(path string, shaderType uint32) (Shader, error) {
 	}
 
 	return shader, nil
-}
-
-func (s *Shader) Delete() {
-	gl.DeleteShader(s.ID)
 }
