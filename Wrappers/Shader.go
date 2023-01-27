@@ -24,7 +24,6 @@ func NewShaderFromFile(path string, shaderType uint32) (Shader, error) {
 
 func NewShader(raw string, shaderType uint32) (Shader, error) {
 	shader := Shader{ID: gl.CreateShader(shaderType)}
-
 	source, free := gl.Strs(raw + " \x00")
 	defer free()
 
@@ -38,6 +37,5 @@ func NewShader(raw string, shaderType uint32) (Shader, error) {
 		gl.GetShaderInfoLog(shader.ID, length, nil, &infoLog[0])
 		return shader, errors.New(string(infoLog))
 	}
-
 	return shader, nil
 }
