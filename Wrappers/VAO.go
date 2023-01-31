@@ -46,8 +46,9 @@ func (v *VAO) Bind() {
 
 func (v *VAO) UnBind() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+
 }
 
 func (v *VAO) Delete() {
@@ -95,7 +96,7 @@ func NewVAO(vertices []float32, usage uint32, attributes ...VertexAttribute) VAO
 	return result
 }
 
-func NewVAOWithEBO(vertices []float32, indices []float32, usage uint32, attributes ...VertexAttribute) VAO {
+func NewVAOWithEBO(vertices []float32, indices []uint32, usage uint32, attributes ...VertexAttribute) VAO {
 	byteStride, elementsStride := getStrides(attributes)
 
 	if len(vertices)%elementsStride != 0 {

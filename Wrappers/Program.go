@@ -9,10 +9,6 @@ type Program struct {
 	ID uint32
 }
 
-func (p *Program) Use() {
-	gl.UseProgram(p.ID)
-}
-
 func NewProgram(shaders ...Shader) (Program, error) {
 	program := Program{ID: gl.CreateProgram()}
 
@@ -29,4 +25,12 @@ func NewProgram(shaders ...Shader) (Program, error) {
 		return Program{}, errors.New(string(infoLog))
 	}
 	return Program{ID: program.ID}, nil
+}
+
+func (p *Program) Use() {
+	gl.UseProgram(p.ID)
+}
+
+func (p *Program) getAttributeLocation(attribute string) int32 {
+	return gl.GetAttribLocation(p.ID, gl.Str(attribute+"\x00"))
 }
