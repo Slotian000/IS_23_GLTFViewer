@@ -20,14 +20,60 @@ const (
 
 var (
 	vertices = []float32{
-		0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, // top right
-		0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, // bottom right
-		-0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, // bottom let
-		-0.5, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0,
+		0.5, -0.5, -0.5, 1.0, 0.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0,
+
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 1.0,
+		0.5, 0.5, 0.5, 1.0, 1.0,
+		-0.5, 0.5, 0.5, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+
+		-0.5, 0.5, 0.5, 1.0, 0.0,
+		-0.5, 0.5, -0.5, 1.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		-0.5, 0.5, 0.5, 1.0, 0.0,
+
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, 0.5, 0.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, -0.5, 1.0, 1.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+
+		-0.5, 0.5, -0.5, 0.0, 1.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		-0.5, 0.5, 0.5, 0.0, 0.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0,
 	}
-	indices = []uint32{
-		0, 1, 3,
-		1, 2, 3,
+
+	cubePositions = []mgl32.Vec3{
+		{0.0, 0.0, 0.0},
+		{2.0, 5.0, -15.0},
+		{1.5, -2.2, -2.5},
+		{3.8, -2.0, -12.3},
+		{2.4, -0.4, -3.5},
+		{1.7, 3.0, -7.5},
+		{1.3, -2.0, -2.5},
+		{1.5, 2.0, -2.5},
+		{1.5, 0.2, -1.5},
+		{1.3, 1.0, -1.5},
 	}
 )
 
@@ -90,31 +136,27 @@ func loop(window *glfw.Window) {
 		Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
 	}
 
-	VAO := Wrappers.NewVAOWithEBO(vertices, indices, gl.STATIC_DRAW, attributes...)
-
-	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program.ID, gl.Str("transform\x00"))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-	angle := 0.0
-	previousTime := glfw.GetTime()
+	VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
 
 	for !window.ShouldClose() {
 		gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
+		view := mgl32.Ident4()
+		projection := mgl32.Ident4()
+		projection = mgl32.Perspective(mgl32.DegToRad(45), float32(windowWidth)/float32(windowHeight), 0.1, 100)
+		view = mgl32.Translate3D(0.0, 0.0, -3.0)
+
+		program.SetMat4("view", view)
+		program.SetMat4("projection", projection)
+
+		for i := 0; i < 10; i++ {
+			model := mgl32.Ident4()
+
+		}
+
 		program.Use()
 		VAO.Bind()
-
-		time := glfw.GetTime()
-		elapsed := time - previousTime
-		previousTime = time
-
-		angle += elapsed
-		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
-		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{1, 0, 0})
-
-		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
 		gl.DrawElementsWithOffset(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
 		window.SwapBuffers()

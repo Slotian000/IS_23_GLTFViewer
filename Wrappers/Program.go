@@ -3,6 +3,7 @@ package Wrappers
 import (
 	"errors"
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 type Program struct {
@@ -31,6 +32,11 @@ func (p *Program) Use() {
 	gl.UseProgram(p.ID)
 }
 
-func (p *Program) getAttributeLocation(attribute string) int32 {
+func (p *Program) GetAttributeLocation(attribute string) int32 {
 	return gl.GetAttribLocation(p.ID, gl.Str(attribute+"\x00"))
+}
+
+func (p *Program) SetMat4(name string, mat4 mgl32.Mat4) {
+	pos := p.getAttributeLocation(name)
+	gl.Uniform1fv(pos, 1, &mat4[0])
 }
