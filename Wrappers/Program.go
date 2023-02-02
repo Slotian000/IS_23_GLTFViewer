@@ -32,11 +32,7 @@ func (p *Program) Use() {
 	gl.UseProgram(p.ID)
 }
 
-func (p *Program) GetAttributeLocation(attribute string) int32 {
-	return gl.GetAttribLocation(p.ID, gl.Str(attribute+"\x00"))
-}
-
 func (p *Program) SetMat4(name string, mat4 mgl32.Mat4) {
-	pos := p.getAttributeLocation(name)
-	gl.Uniform1fv(pos, 1, &mat4[0])
+	modelUniform := gl.GetUniformLocation(p.ID, gl.Str(name+"\x00"))
+	gl.UniformMatrix4fv(modelUniform, 1, false, &mat4[0])
 }
