@@ -20,31 +20,61 @@ const (
 
 var (
 	vertices = []float32{
-		0.5, 0.5, 0.0, 1.0, 1.0, // top right
-		0.5, -0.5, 0.0, 1.0, 0.0, // bottom right
-		-0.5, -0.5, 0.0, 0.0, 0.0, // bottom let
-		-0.5, 0.5, 0.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0,
+		0.5, -0.5, -0.5, 1.0, 0.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0,
+
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 1.0,
+		0.5, 0.5, 0.5, 1.0, 1.0,
+		-0.5, 0.5, 0.5, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+
+		-0.5, 0.5, 0.5, 1.0, 0.0,
+		-0.5, 0.5, -0.5, 1.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		-0.5, 0.5, 0.5, 1.0, 0.0,
+
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, 0.5, 0.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, -0.5, 1.0, 1.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		0.5, -0.5, 0.5, 1.0, 0.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0,
+		-0.5, -0.5, -0.5, 0.0, 1.0,
+
+		-0.5, 0.5, -0.5, 0.0, 1.0,
+		0.5, 0.5, -0.5, 1.0, 1.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0,
+		-0.5, 0.5, 0.5, 0.0, 0.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0,
 	}
 
-	indices = []uint32{
-		0, 1, 3,
-		1, 2, 3,
+	cubePositions = []mgl32.Vec3{
+		{0.0, 0.0, 0.0},
+		{2.0, 5.0, -15.0},
+		{1.5, -2.2, -2.5},
+		{3.8, -2.0, -12.3},
+		{2.4, -0.4, -3.5},
+		{1.7, 3.0, -7.5},
+		{1.3, -2.0, -2.5},
+		{1.5, 2.0, -2.5},
+		{1.5, 0.2, -1.5},
+		{1.3, 1.0, -1.5},
 	}
-	/*
-		cubePositions = []mgl32.Vec3{
-			{0.0, 0.0, 0.0},
-			{2.0, 5.0, -15.0},
-			{1.5, -2.2, -2.5},
-			{3.8, -2.0, -12.3},
-			{2.4, -0.4, -3.5},
-			{1.7, 3.0, -7.5},
-			{1.3, -2.0, -2.5},
-			{1.5, 2.0, -2.5},
-			{1.5, 0.2, -1.5},
-			{1.3, 1.0, -1.5},
-		}
-
-	*/
 )
 
 func init() {
@@ -106,31 +136,33 @@ func loop(window *glfw.Window) {
 		Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
 	}
 
-	VAO := Wrappers.NewVAOWithEBO(vertices, indices, gl.STATIC_DRAW, attributes...)
+	VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
+
+	program.Use()
+	VAO.Bind()
+
+	view := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+	program.SetMat4("view", view)
+	program.SetMat4("projection", projection)
 
 	gl.Enable(gl.DEPTH_TEST)
 
 	for !window.ShouldClose() {
 		gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		program.Use()
-		VAO.Bind()
 
-		model := mgl32.Ident4()
-		model = mgl32.HomogRotate3D(mgl32.DegToRad(45), mgl32.Vec3{1, 1, 0})
+		for _, vec := range cubePositions {
+			model := mgl32.Translate3D(vec.X(), vec.Y(), vec.Z())
+			model = model.Mul4(mgl32.HomogRotate3D(mgl32.DegToRad(45)*float32(glfw.GetTime()), mgl32.Vec3{0.5, 1, 0}))
 
-		view := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-		projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+			///model = mgl32.HomogRotate3D(mgl32.DegToRad(45)*float32(glfw.GetTime()), mgl32.Vec3{0.5, 1, 0})
+			//program.SetMat4("model", model)
+			program.SetMat4("model", model)
+			gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		}
 
-		program.SetMat4("view", view)
-		program.SetMat4("projection", projection)
-		program.SetMat4("model", model)
-
-		/*
-			projection = mgl32.Perspective(mgl32.DegToRad(45), float32(windowWidth)/float32(windowHeight), 0.1, 100)
-			view = mgl32.Translate3D(0.0, 0.0, -3.0)
-		*/
-		gl.DrawElementsWithOffset(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
+		//gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
