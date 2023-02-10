@@ -75,6 +75,13 @@ var (
 		{1.5, 0.2, -1.5},
 		{1.3, 1.0, -1.5},
 	}
+
+	cameraPos   = mgl32.Vec3{0, 0, 3}
+	cameraFront = mgl32.Vec3{0, 0, -1}
+	cameraUp    = mgl32.Vec3{0, 1, 0}
+
+	deltaTime = 0.0
+	lastFrame = 0.0
 )
 
 func init() {
@@ -141,39 +148,65 @@ func loop(window *glfw.Window) {
 	program.Use()
 	VAO.Bind()
 
-	view := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	program.SetMat4("view", view)
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/float32(windowHeight), 0.1, 100.0)
 	program.SetMat4("projection", projection)
 
 	gl.Enable(gl.DEPTH_TEST)
+	gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 
 	for !window.ShouldClose() {
-		gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		for _, vec := range cubePositions {
-			model := mgl32.Translate3D(vec.X(), vec.Y(), vec.Z())
-			model = model.Mul4(mgl32.HomogRotate3D(mgl32.DegToRad(45)*float32(glfw.GetTime()), mgl32.Vec3{0.5, 1, 0}))
+		currentFrame := glfw.GetTime()
+		deltaTime = currentFrame - lastFrame
+		lastFrame = currentFrame
 
-			///model = mgl32.HomogRotate3D(mgl32.DegToRad(45)*float32(glfw.GetTime()), mgl32.Vec3{0.5, 1, 0})
-			//program.SetMat4("model", model)
-			program.SetMat4("model", model)
+		for _, vec := range cubePositions {
+			program.SetMat4("model", mgl32.Translate3D(vec.X(), vec.Y(), vec.Z()))
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
-		//gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		view := mgl32.LookAtV(cameraPos, cameraPos.Add(cameraFront), cameraUp)
+		program.SetMat4("view", view)
+
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
 }
 
 func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if key == glfw.KeyEscape && action == glfw.Press {
+
+	speed := float32(2.5 * deltaTime)
+
+	if key == glfw.KeyW {
+		cameraPos = cameraPos.Add(cameraFront.Mul(speed))
+	}
+	if key == glfw.KeyS {
+		cameraPos = cameraPos.Sub(cameraFront.Mul(speed))
+	}
+	if key == glfw.KeyA {
+		cameraPos = cameraPos.Sub(cameraFront.Cross(cameraUp).Normalize().Mul(speed))
+	}
+	if key == glfw.KeyD {
+		cameraPos = cameraPos.Add(cameraFront.Cross(cameraUp).Normalize().Mul(speed))
+	}
+	if key == glfw.KeyEscape {
 		window.SetShouldClose(true)
 	}
+
 }
 
 func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
+
+/*
+	cameraPosition := mgl32.Vec3{0.0, 0.0, 3.0}
+	cameraTarget := mgl32.Vec3{0.0, 0.0, 0.0}
+	cameraDirection := cameraPosition.Sub(cameraTarget).Normalize()
+
+	up := mgl32.Vec3{0.0, 1.0, 0.0}
+	cameraRight := up.Cross(cameraDirection).Normalize()
+
+	_ = cameraDirection.Cross(cameraRight).Normalize()
+*/
