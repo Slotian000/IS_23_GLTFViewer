@@ -9,6 +9,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"math"
 	"openGL/Wrappers"
 	"runtime"
 )
@@ -16,6 +17,7 @@ import (
 const (
 	windowWidth  = 800
 	windowHeight = 600
+	sensitivity  = .1
 )
 
 var (
@@ -62,7 +64,6 @@ var (
 		-0.5, 0.5, 0.5, 0.0, 0.0,
 		-0.5, 0.5, -0.5, 0.0, 1.0,
 	}
-
 	cubePositions = []mgl32.Vec3{
 		{0.0, 0.0, 0.0},
 		{2.0, 5.0, -15.0},
@@ -79,6 +80,12 @@ var (
 	cameraPos   = mgl32.Vec3{0, 0, 3}
 	cameraFront = mgl32.Vec3{0, 0, -1}
 	cameraUp    = mgl32.Vec3{0, 1, 0}
+
+	fov   float32 = .5
+	lastX float32 = 400.0
+	lastY float32 = 300.0
+	yaw   float32 = -90.0
+	pitch float32 = 0
 
 	deltaTime = 0.0
 	lastFrame = 0.0
@@ -105,7 +112,10 @@ func main() {
 		panic(err)
 	}
 	window.MakeContextCurrent()
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 	window.SetKeyCallback(keyCallback)
+	window.SetCursorPosCallback(mouseCallBack)
+	window.SetScrollCallback(scrollCallBack)
 	window.SetFramebufferSizeCallback(framebufferSizeCallback)
 
 	if err = gl.Init(); err != nil {
@@ -115,7 +125,6 @@ func main() {
 }
 
 func loop(window *glfw.Window) {
-
 	vertexShader, err := Wrappers.NewShaderFromFile("Sources/default.vert", gl.VERTEX_SHADER)
 	if err != nil {
 		fmt.Println(err)
@@ -148,9 +157,6 @@ func loop(window *glfw.Window) {
 	program.Use()
 	VAO.Bind()
 
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/float32(windowHeight), 0.1, 100.0)
-	program.SetMat4("projection", projection)
-
 	gl.Enable(gl.DEPTH_TEST)
 	gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 
@@ -166,6 +172,9 @@ func loop(window *glfw.Window) {
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
+		projection := mgl32.Perspective(mgl32.DegToRad(fov), float32(windowWidth)/float32(windowHeight), 0.1, 100.0)
+		program.SetMat4("projection", projection)
+
 		view := mgl32.LookAtV(cameraPos, cameraPos.Add(cameraFront), cameraUp)
 		program.SetMat4("view", view)
 
@@ -175,22 +184,23 @@ func loop(window *glfw.Window) {
 }
 
 func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	speed := float32(250 * deltaTime)
 
-	speed := float32(2.5 * deltaTime)
-
-	if key == glfw.KeyW {
+	switch key {
+	case
+		glfw.KeyW:
 		cameraPos = cameraPos.Add(cameraFront.Mul(speed))
-	}
-	if key == glfw.KeyS {
+
+	case glfw.KeyS:
 		cameraPos = cameraPos.Sub(cameraFront.Mul(speed))
-	}
-	if key == glfw.KeyA {
+
+	case glfw.KeyA:
 		cameraPos = cameraPos.Sub(cameraFront.Cross(cameraUp).Normalize().Mul(speed))
-	}
-	if key == glfw.KeyD {
+
+	case glfw.KeyD:
 		cameraPos = cameraPos.Add(cameraFront.Cross(cameraUp).Normalize().Mul(speed))
-	}
-	if key == glfw.KeyEscape {
+
+	case glfw.KeyEscape:
 		window.SetShouldClose(true)
 	}
 
@@ -200,13 +210,42 @@ func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
-/*
-	cameraPosition := mgl32.Vec3{0.0, 0.0, 3.0}
-	cameraTarget := mgl32.Vec3{0.0, 0.0, 0.0}
-	cameraDirection := cameraPosition.Sub(cameraTarget).Normalize()
+func mouseCallBack(w *glfw.Window, x float64, y float64) {
+	xOffset := (float32(x) - lastX) * sensitivity
+	yOffset := (lastY - float32(y)) * sensitivity
+	lastX = float32(x)
+	lastY = float32(y)
 
-	up := mgl32.Vec3{0.0, 1.0, 0.0}
-	cameraRight := up.Cross(cameraDirection).Normalize()
+	yaw += xOffset
+	pitch += yOffset
 
-	_ = cameraDirection.Cross(cameraRight).Normalize()
-*/
+	if pitch > 89 {
+		pitch = 89
+	} else if pitch < -89 {
+		pitch = -89
+	}
+
+	front := mgl32.Vec3{
+		cos(mgl32.DegToRad(yaw)) * cos(mgl32.DegToRad(pitch)),
+		sin(mgl32.DegToRad(pitch)),
+		sin(mgl32.DegToRad(yaw)) * cos(mgl32.DegToRad(pitch)),
+	}
+
+	cameraFront = front.Normalize()
+}
+func scrollCallBack(w *glfw.Window, x float64, y float64) {
+	fov -= float32(y)
+
+	if fov < 1 {
+		fov = 1
+	} else if fov > 120 {
+		fov = 120
+	}
+}
+
+func sin(f float32) float32 {
+	return float32(math.Sin(float64(f)))
+}
+func cos(f float32) float32 {
+	return float32(math.Cos(float64(f)))
+}
