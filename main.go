@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	windowWidth  = 800
-	windowHeight = 600
-	sensitivity  = .1
+	WindowWidth  = 800
+	WindowHeight = 600
+	Sensitivity  = .1
 )
 
 var (
@@ -107,7 +107,7 @@ func main() {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.Resizable, glfw.True)
-	window, err := glfw.CreateWindow(windowWidth, windowHeight, "Hello!", nil, nil)
+	window, err := glfw.CreateWindow(WindowWidth, WindowHeight, "Hello!", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -172,7 +172,7 @@ func loop(window *glfw.Window) {
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
-		projection := mgl32.Perspective(mgl32.DegToRad(fov), float32(windowWidth)/float32(windowHeight), 0.1, 100.0)
+		projection := mgl32.Perspective(mgl32.DegToRad(fov), float32(WindowWidth)/float32(WindowHeight), 0.1, 100.0)
 		program.SetMat4("projection", projection)
 
 		view := mgl32.LookAtV(cameraPos, cameraPos.Add(cameraFront), cameraUp)
@@ -211,8 +211,8 @@ func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 }
 
 func mouseCallBack(w *glfw.Window, x float64, y float64) {
-	xOffset := (float32(x) - lastX) * sensitivity
-	yOffset := (lastY - float32(y)) * sensitivity
+	xOffset := (float32(x) - lastX) * Sensitivity
+	yOffset := (lastY - float32(y)) * Sensitivity
 	lastX = float32(x)
 	lastY = float32(y)
 
