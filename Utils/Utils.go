@@ -1,6 +1,9 @@
 package Utils
 
-import "reflect"
+import (
+	"math"
+	"reflect"
+)
 
 func genEBO(vertices []float32, stride int) ([]float32, []uint32) {
 	newVertices := make([]float32, 0)
@@ -23,4 +26,11 @@ func genEBO(vertices []float32, stride int) ([]float32, []uint32) {
 	}
 
 	return newVertices, indices
+}
+
+func Sin(f float32) float32 {
+	return float32(math.Sin(float64(f)))
+}
+func Cos(f float32) float32 {
+	return float32(math.Cos(float64(f)))
 }
