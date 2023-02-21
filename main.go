@@ -100,9 +100,9 @@ func main() {
 	}
 	window.MakeContextCurrent()
 	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
-	window.SetKeyCallback(Utils.KeyCallback)
-	//window.SetCursorPosCallback(mouseCallBack)
-	//window.SetScrollCallback(scrollCallBack)
+	window.SetKeyCallback(KeyCallback)
+	window.SetCursorPosCallback(CursorPosCallback)
+	window.SetScrollCallback(ScrollCallBack)
 	window.SetFramebufferSizeCallback(framebufferSizeCallback)
 
 	if err = gl.Init(); err != nil {
@@ -162,12 +162,10 @@ func loop(window *glfw.Window) {
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
-		x, y := window.GetCursorPos()
-		camera.Update(DeltaTime(), float32(x), float32(y))
-
 		program.SetMat4("view", camera.View)
 		program.SetMat4("projection", camera.Projection)
 
+		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), &Active)
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
@@ -176,17 +174,3 @@ func loop(window *glfw.Window) {
 func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
-
-/*
-func scrollCallBack(w *glfw.Window, x float64, y float64) {
-	fov -= float32(y)
-
-	if fov < 1 {
-		fov = 1
-	} else if fov > 120 {
-		fov = 120
-	}
-}
-
-
-*/
