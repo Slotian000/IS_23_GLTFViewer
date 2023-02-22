@@ -152,7 +152,7 @@ func loop(window *glfw.Window) {
 	program.Use()
 	VAO.Bind()
 
-	camera := Utils.NewCamera()
+	camera := Utils.NewCamera(WindowWidth, WindowHeight)
 
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -162,12 +162,12 @@ func loop(window *glfw.Window) {
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
-		program.SetMat4("view", camera.View)
-		program.SetMat4("projection", camera.Projection)
-
-		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), &Active)
 		window.SwapBuffers()
 		glfw.PollEvents()
+		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), &Active)
+
+		program.SetMat4("view", camera.View)
+		program.SetMat4("projection", camera.Projection)
 	}
 }
 
