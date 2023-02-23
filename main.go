@@ -9,6 +9,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"openGL/Object"
 	"openGL/Utils"
 	"openGL/Wrappers"
 	"runtime"
@@ -136,36 +137,48 @@ func loop(window *glfw.Window) {
 		fmt.Println(err)
 	}
 
-	texture, err := Wrappers.NewTexture("Sources/container.jpg")
+	/*
+		texture, err := Wrappers.NewTexture("Sources/container.jpg")
+		if err != nil {
+			fmt.Println(err)
+		}
+		texture.Bind()
+
+		attributes := []Wrappers.VertexAttribute{
+			Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
+			//Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
+			Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
+		}
+		VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
+
+			VAO.Bind()
+
+	*/
+	program.Use()
+
+	object, err := Object.NewObjectFromFile("Sources/object.obj")
 	if err != nil {
 		fmt.Println(err)
 	}
-	texture.Bind()
 
-	attributes := []Wrappers.VertexAttribute{
-		Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-		//Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-		Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
-	}
-	VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
-
-	program.Use()
-	VAO.Bind()
+	object.VAO.Bind()
 
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
-
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		for _, vec := range cubePositions {
-			program.SetMat4("model", mgl32.Translate3D(vec.X(), vec.Y(), vec.Z()))
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		}
+		/*
+			for _, vec := range cubePositions {
+				program.SetMat4("model", mgl32.Translate3D(vec.X(), vec.Y(), vec.Z()))
+
+			}
+
+		*/
+		gl.DrawElementsWithOffset(gl.TRIANGLES, int32(object.VAO.Count), gl.UNSIGNED_INT, 0)
 
 		window.SwapBuffers()
 		glfw.PollEvents()
-		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), &Active)
-
+		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)
 		program.SetMat4("view", camera.View)
 		program.SetMat4("projection", camera.Projection)
 	}

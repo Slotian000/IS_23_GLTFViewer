@@ -37,7 +37,7 @@ type VAO struct {
 	vertexBufferID  uint32
 	elementBufferID uint32
 	UsingEBO        bool
-	count           int
+	Count           int
 }
 
 func (v *VAO) Bind() {
@@ -83,7 +83,7 @@ func NewVAO(vertices []float32, usage uint32, attributes ...VertexAttribute) VAO
 		panic("Vertices does not match stride")
 	}
 
-	result := VAO{count: len(vertices) / elementsStride}
+	result := VAO{Count: len(vertices) / elementsStride}
 	gl.GenVertexArrays(1, &result.ID)
 	gl.GenBuffers(1, &result.vertexBufferID)
 	result.Bind()
@@ -103,7 +103,7 @@ func NewVAOWithEBO(vertices []float32, indices []uint32, usage uint32, attribute
 		panic("Vertices does not match stride")
 	}
 
-	result := VAO{count: len(vertices) / elementsStride}
+	result := VAO{Count: len(vertices) / elementsStride}
 	gl.GenVertexArrays(1, &result.ID)
 	gl.GenBuffers(1, &result.vertexBufferID)
 	gl.GenBuffers(1, &result.elementBufferID)
