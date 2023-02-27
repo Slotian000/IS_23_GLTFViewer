@@ -6,9 +6,9 @@ import (
 )
 
 type Material struct {
-	Ka    [3]float32
-	Kd    [3]float32
-	Ks    [3]float32
+	Ka    []float32
+	Kd    []float32
+	Ks    []float32
 	D     float32
 	Tr    float32
 	Ns    float32
@@ -23,7 +23,8 @@ func ReadMaterialsFromFile(path string) (map[string]Material, error) {
 		return materials, err
 	}
 
-	current := ""
+	name := ""
+	current := Material{}
 
 	for _, line := range strings.Split(string(file), "\n") {
 
@@ -32,11 +33,27 @@ func ReadMaterialsFromFile(path string) (map[string]Material, error) {
 		case line == "":
 		case strings.HasPrefix(line, "#"):
 		case strings.HasPrefix(line, "newmtl "):
-			current := strings.TrimPrefix(line, "newmtl ")
-			materials[current] = Material{}
-
-		case strings.HasPrefix(line, "Ka ") || strings.HasPrefix(line, "Kd ") || strings.HasPrefix(line, "Ks "):
-
+			materials[name] = current
+			name = strings.TrimPrefix(line, "newmtl ")
+			current = Material{}
+		case strings.HasPrefix(line, "Ka"):
+			current.Ka = readThreeFloats(line, "Ka ")
+		case strings.HasPrefix(line, "Kd"):
+			current.Kd = readThreeFloats(line, "Kd ")
+		case strings.HasPrefix(line, "Ks"):
+			current.Ks = readThreeFloats(line, "Ks ")
+		case strings.HasPrefix(line, "D"):
+			current.D = readFloat(line, "D ")
+		case strings.HasPrefix(line, "Tr"):
+			current.Tr = readFloat(line, "Tr ")
+		case strings.HasPrefix(line, "Ns"):
+			current.Ns = readFloat(line, "Ns ")
+		case strings.HasPrefix(line, "Illum"):
+			current.Illum = readInt(line, "Illum ")
+			//case strings.HasPrefix(line, "MapKa"):
+			//current.Illum = readInt(line, "Illum ")
 		}
 	}
+	materials[name] = current
+	return materials, nil
 }

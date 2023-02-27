@@ -1,5 +1,71 @@
 package Object
 
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+type Group struct {
+	Name     string
+	Material string
+	Indices  []uint32
+}
+
+type Object struct {
+	Materials map[string]Material
+	Groups    []Group
+}
+
+func NewObject(path string) (Object, error) {
+	object := Object{}
+	file, err := os.ReadFile(path)
+	if err != nil {
+		return object, err
+	}
+	group := Group{Name: ""}
+
+	for _, line := range strings.Split(string(file), "\n") {
+		switch {
+		case line == "":
+		case strings.HasPrefix(line, "#"):
+		case strings.HasPrefix(line, "mtllib"):
+			if materials, err := ReadMaterialsFromFile(strings.SplitAfter(line, " ")[1]); err != nil {
+				return Object{}, err
+			} else {
+				object.Materials = materials
+			}
+		case strings.HasPrefix(line, "g"):
+
+		}
+
+	}
+}
+
+func readThreeFloats(line string, prefix string) []float32 {
+	var x, y, z float32
+	if _, err := fmt.Sscanf(strings.TrimPrefix(line, prefix), "%f %f %f", &x, &y, &z); err != nil {
+		return []float32{0, 0, 0}
+	}
+	return []float32{x, y, z}
+}
+
+func readFloat(line string, prefix string) float32 {
+	var x float32
+	if _, err := fmt.Sscanf(strings.TrimPrefix(line, prefix), "%f", &x); err != nil {
+		return 0
+	}
+	return x
+}
+
+func readInt(line string, prefix string) int {
+	var x int
+	if _, err := fmt.Sscanf(strings.TrimPrefix(line, prefix), "%d", &x); err != nil {
+		return 0
+	}
+	return x
+}
+
 /*
 type Object struct {
 	path string
