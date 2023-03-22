@@ -1,10 +1,5 @@
 package Object
 
-import (
-	"os"
-	"strings"
-)
-
 type Material struct {
 	Ka    []float32
 	Kd    []float32
@@ -16,6 +11,7 @@ type Material struct {
 	MapKa []byte
 }
 
+/*
 func ReadMaterialsFromFile(path string) (map[string]Material, error) {
 	materials := make(map[string]Material)
 	file, err := os.ReadFile(path)
@@ -37,23 +33,27 @@ func ReadMaterialsFromFile(path string) (map[string]Material, error) {
 			name = strings.TrimPrefix(line, "newmtl ")
 			current = Material{}
 		case strings.HasPrefix(line, "Ka"):
-			current.Ka = readThreeFloats(line, "Ka ")
+			current.Ka = readFloats(line, "Ka ")
 		case strings.HasPrefix(line, "Kd"):
-			current.Kd = readThreeFloats(line, "Kd ")
+			current.Kd = readFloats(line, "Kd ")
 		case strings.HasPrefix(line, "Ks"):
-			current.Ks = readThreeFloats(line, "Ks ")
+			current.Ks = readFloats(line, "Ks ")
 		case strings.HasPrefix(line, "D"):
-			current.D = readFloat(line, "D ")
+			current.D = readFloats(line, "D ")[0]
 		case strings.HasPrefix(line, "Tr"):
-			current.Tr = readFloat(line, "Tr ")
+			current.Tr = readFloats(line, "Tr ")[0]
 		case strings.HasPrefix(line, "Ns"):
-			current.Ns = readFloat(line, "Ns ")
+			current.Ns = readFloats(line, "Ns ")[0]
 		case strings.HasPrefix(line, "Illum"):
-			current.Illum = readInt(line, "Illum ")
+			current.Illum = readInts(line, "Illum ")[0]
 			//case strings.HasPrefix(line, "MapKa"):
 			//current.Illum = readInt(line, "Illum ")
 		}
 	}
 	materials[name] = current
 	return materials, nil
+
 }
+
+
+*/
