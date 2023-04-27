@@ -119,6 +119,6 @@ func Test() {
 
 	doc, _ := gltf.Open("Sources/AnimatedCube.gltf")
 
-	fmt.Println(doc.Animations)
+	fmt.Println(doc.Materials[0])
 
 }

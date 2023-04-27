@@ -8,7 +8,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"openGL/Object"
 	"runtime"
 )
 
@@ -45,7 +44,7 @@ func init() {
 }
 
 func main() {
-	Object.Test()
+	load()
 
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to inifitialize glfw:", err)
