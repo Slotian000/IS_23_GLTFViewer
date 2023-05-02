@@ -1,14 +1,9 @@
 package Object
 
 type Material struct {
-	Ka    []float32
-	Kd    []float32
-	Ks    []float32
-	D     float32
-	Tr    float32
-	Ns    float32
-	Illum int
-	MapKa []byte
+	BaseColor       uint32
+	MetallicFactor  float32
+	RoughnessFactor float32
 }
 
 /*

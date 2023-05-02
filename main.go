@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
@@ -8,6 +9,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"openGL/Utils"
+	"openGL/Wrappers"
 	"runtime"
 )
 
@@ -44,7 +47,6 @@ func init() {
 }
 
 func main() {
-	load()
 
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to inifitialize glfw:", err)
@@ -73,7 +75,8 @@ func main() {
 	}
 	gl.Enable(gl.DEPTH_TEST)
 	gl.ClearColor(0.2, 0.5, 0.5, 1.0)
-	//loop(window)
+	meshes := test()
+	loop(window, meshes)
 }
 
 func DeltaTime() float32 {
@@ -83,70 +86,59 @@ func DeltaTime() float32 {
 	return float32(deltaTime)
 }
 
-/*
-	func loop(window *glfw.Window) {
-		vertexShader, err := Wrappers.NewShaderFromFile("Sources/default.vert", gl.VERTEX_SHADER)
-		if err != nil {
-			fmt.Println(err)
-		}
+func loop(window *glfw.Window, meshes []Mesh) {
+	vertexShader, err := Wrappers.NewShaderFromFile("Sources/VertexShader.vert", gl.VERTEX_SHADER)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-		fragmentShader, err := Wrappers.NewShaderFromFile("Sources/default.frag", gl.FRAGMENT_SHADER)
-		if err != nil {
-			fmt.Println(err)
-		}
+	fragmentShader, err := Wrappers.NewShaderFromFile("Sources/FragmentShader.frag", gl.FRAGMENT_SHADER)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-		program, err := Wrappers.NewProgram(vertexShader, fragmentShader)
-		if err != nil {
-			fmt.Println(err)
-		}
+	program, err := Wrappers.NewProgram(vertexShader, fragmentShader)
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	/*
 		texture, err := Wrappers.NewTexture("Sources/container.jpg")
 		if err != nil {
 			fmt.Println(err)
 		}
 		texture.Bind()
 
-		/*
-
-
-			attributes := []Wrappers.VertexAttribute{
-				Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-				//Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-				Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
-			}
-			VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
-
-				VAO.Bind()
-
-		program.Use()
-
-
-		if _, err := Object.NewObject("Sources/object.obj"); err != nil {
-			fmt.Println(err)
+		attributes := []Wrappers.VertexAttribute{
+			Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
+			//Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
+			Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
 		}
-		//object.VAO.Bind()
+		VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
 
-		camera := Utils.NewCamera(WindowWidth, WindowHeight)
-		for !window.ShouldClose() {
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			program.SetMat4("model", mgl32.Translate3D(0, 0, 0))
+		VAO.Bind()
 
-			/*
-				for _, vec := range cubePositions {
-					program.SetMat4("model", mgl32.Translate3D(vec.X(), vec.Y(), vec.Z()))
+	*/
 
-				}
+	program.Use()
+	camera := Utils.NewCamera(WindowWidth, WindowHeight)
+	for !window.ShouldClose() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		program.SetMat4("model", mgl32.Translate3D(0, 0, 0))
 
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		for _, mesh := range meshes {
+			mesh.VAO.Bind()
+			gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
 
-			window.SwapBuffers()
-			glfw.PollEvents()
-			camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)
-			program.SetMat4("view", camera.View)
-			program.SetMat4("projection", camera.Projection)
 		}
+		window.SwapBuffers()
+		glfw.PollEvents()
+		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)
+		program.SetMat4("view", camera.View)
+		program.SetMat4("projection", camera.Projection)
 	}
-*/
+}
+
 func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
