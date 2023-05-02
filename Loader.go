@@ -16,6 +16,7 @@ type Mesh struct {
 	Tangents      []float32
 	Indices       []uint32
 	VAO           Wrappers.VAO
+	Program       Wrappers.Program
 }
 
 type Image struct {
@@ -35,23 +36,29 @@ func test() []Mesh {
 		fmt.Println(err)
 	}
 	meshes := make([]Mesh, 0, 0)
+	textures := make([]Wrappers.Texture, 0, 0)
 
 	for _, node := range doc.Nodes {
 		if node.Mesh != nil {
 			attributes := doc.Meshes[*node.Mesh].Primitives[0].Attributes
 			mesh := Mesh{Indices: Uint16BufferAsUint32Buffer(doc, *doc.Meshes[*node.Mesh].Primitives[0].Indices)}
+			key := ""
 
 			if accessor, ok := attributes["POSITION"]; ok {
 				mesh.Positions = Float32Buffer(doc, accessor)
+				key += "P"
 			}
 			if accessor, ok := attributes["NORMAL"]; ok {
 				mesh.NormalCoords = Float32Buffer(doc, accessor)
+				key += "N"
 			}
 			if accessor, ok := attributes["TEXCOORD_0"]; ok {
 				mesh.TextureCoords = Float32Buffer(doc, accessor)
+				key += "T"
 			}
 			if accessor, ok := attributes["TANGENT"]; ok {
 				mesh.Tangents = Float32Buffer(doc, accessor)
+				key += "T"
 			}
 
 			raw := make([]float32, 0, len(mesh.Positions)*4)
@@ -66,6 +73,17 @@ func test() []Mesh {
 			meshes = append(meshes, mesh)
 		}
 	}
+	for _, image := range doc.Images {
+		texture, _ := Wrappers.NewTexture("Sources/" + image.URI)
+		texture.Bind()
+		textures = append(textures, texture)
+	}
+
+	for _, material := range doc.Materials {
+		texture := material.PBRMetallicRoughness.BaseColorTexture
+		fmt.Println(texture.Index)
+	}
+
 	return meshes
 }
 

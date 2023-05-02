@@ -20,26 +20,12 @@ const (
 )
 
 var (
-	vertices = []float32{
-		1, 1, -1, 0.250471, 0.500702, 1, -0, 0, 1, -1, -1, 0.748573, 0.750412, 0, 0, -1, -1, -1, -1, 0.999455, 0.75038, -1e-06, 0, 1, 1, 1, -1, 0.250471, 0.500702, 1, -0, 0, -1, -1, -1, 0.999455, 0.75038, -1e-06, 0, 1, -1, 1, -1, 0.001517, 0.499994, -0, -1, 0, -1, -1, 1, 0.99911, 0.501077,
-		-0, -0, 1, -1, 1, 1, 0.001085, 0.75038, 0, 1, -0, -1, 1, -1, 0.001517, 0.499994, -0, -1, 0, -1, -1, 1, 0.99911, 0.501077, -0, -0, 1, -1, 1, -1, 0.001517, 0.499994, -0, -1, 0, -1, -1, -1, 0.999455, 0.75038, -1e-06, 0, 1, 1, -1, 1, 0.749279, 0.501284, -1, -0, -0, 0.999999, 1, 1.0000,
-		01, 0.249682, 0.749677, 1, 0, 1e-06, -1, -1, 1, 0.99911, 0.501077, -0, -0, 1, 0.999999, 1, 1.000001, 0.249682, 0.749677, 1, 0, 1e-06, -1, 1, 1, 0.001085, 0.75038, 0, 1, -0, -1, -1, 1, 0.99911, 0.501077, -0, -0, 1, 1, -1, -1, 0.748573, 0.750412, 0, 0, -1, 1, 1, -1, 0.250471, 0.50,
-		0702, 1, -0, 0, 1, -1, 1, 0.749279, 0.501284, -1, -0, -0, 1, 1, -1, 0.250471, 0.500702, 1, -0, 0, 0.999999, 1, 1.000001, 0.249682, 0.749677, 1, 0, 1e-06, 1, -1, 1, 0.749279, 0.501284, -1, -0, -0, 1, 1, -1, 0.250471, 0.500702, 1, -0, 0, -1, 1, -1, 0.001517, 0.499994, -0, -1, 0, 0.9,
-		99999, 1, 1.000001, 0.249682, 0.749677, 1, 0, 1e-06, -1, 1, -1, 0.001517, 0.499994, -0, -1, 0, -1, 1, 1, 0.001085, 0.75038, 0, 1, -0, 0.999999, 1, 1.000001, 0.249682, 0.749677, 1, 0, 1e-06, 1, -1, -1, 0.748573, 0.750412, 0, 0, -1, 1, -1, 1, 0.749279, 0.501284, -1, -0, -0, -1, -1, 1, 0.99911, 0.501077, -0, -0, 1, 1, -1, -1, 0.748573, 0.750412, 0, 0, -1, -1, -1, 1, 0.99911, 0.501077, -0, -0, 1, -1, -1, -1, 0.999455, 0.75038, -1e-06, 0, 1,
-	}
-	cubePositions = []mgl32.Vec3{
-		{0.0, 0.0, 0.0},
-		{2.0, 5.0, -15.0},
-		{1.5, -2.2, -2.5},
-		{3.8, -2.0, -12.3},
-		{2.4, -0.4, -3.5},
-		{1.7, 3.0, -7.5},
-		{1.3, -2.0, -2.5},
-		{1.5, 2.0, -2.5},
-		{1.5, 0.2, -1.5},
-		{1.3, 1.0, -1.5},
-	}
 	lastFrame = 0.0
+
+	shaders = map[string]Wrappers.Program{
+		"PNT":  LoadProgram("Shaders/PNT"),
+		"PNTT": LoadProgram("Shaders/PNTT"),
+	}
 )
 
 func init() {
@@ -102,24 +88,6 @@ func loop(window *glfw.Window, meshes []Mesh) {
 		fmt.Println(err)
 	}
 
-	/*
-		texture, err := Wrappers.NewTexture("Sources/container.jpg")
-		if err != nil {
-			fmt.Println(err)
-		}
-		texture.Bind()
-
-		attributes := []Wrappers.VertexAttribute{
-			Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-			//Wrappers.NewVertexAttribute(3, gl.FLOAT, false),
-			Wrappers.NewVertexAttribute(2, gl.FLOAT, false),
-		}
-		VAO := Wrappers.NewVAO(vertices, gl.STATIC_DRAW, attributes...)
-
-		VAO.Bind()
-
-	*/
-
 	program.Use()
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
 	for !window.ShouldClose() {
@@ -129,8 +97,8 @@ func loop(window *glfw.Window, meshes []Mesh) {
 		for _, mesh := range meshes {
 			mesh.VAO.Bind()
 			gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
-
 		}
+
 		window.SwapBuffers()
 		glfw.PollEvents()
 		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)
@@ -141,4 +109,20 @@ func loop(window *glfw.Window, meshes []Mesh) {
 
 func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
+}
+
+func LoadProgram(path string) Wrappers.Program {
+	vertexShader, err := Wrappers.NewShaderFromFile(path+"/VertexShader.vert", gl.VERTEX_SHADER)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fragmentShader, err := Wrappers.NewShaderFromFile(path+"/FragmentShader.frag", gl.FRAGMENT_SHADER)
+	if err != nil {
+		fmt.Println(err)
+	}
+	program, err := Wrappers.NewProgram(vertexShader, fragmentShader)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return program
 }
