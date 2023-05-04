@@ -21,11 +21,7 @@ const (
 
 var (
 	lastFrame = 0.0
-
-	shaders = map[string]Wrappers.Program{
-		"PNT":  LoadProgram("Shaders/PNT"),
-		"PNTT": LoadProgram("Shaders/PNTT"),
-	}
+	Programs  = map[string]Wrappers.Program{}
 )
 
 func init() {
@@ -61,6 +57,9 @@ func main() {
 	}
 	gl.Enable(gl.DEPTH_TEST)
 	gl.ClearColor(0.2, 0.5, 0.5, 1.0)
+	Programs["PNT"] = LoadProgram("Shaders/PNT")
+	Programs["PNTX"] = LoadProgram("Shaders/PNTT")
+
 	meshes := test()
 	loop(window, meshes)
 }
@@ -73,37 +72,26 @@ func DeltaTime() float32 {
 }
 
 func loop(window *glfw.Window, meshes []Mesh) {
-	vertexShader, err := Wrappers.NewShaderFromFile("Sources/VertexShader.vert", gl.VERTEX_SHADER)
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	fragmentShader, err := Wrappers.NewShaderFromFile("Sources/FragmentShader.frag", gl.FRAGMENT_SHADER)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	program, err := Wrappers.NewProgram(vertexShader, fragmentShader)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	program.Use()
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		program.SetMat4("model", mgl32.Translate3D(0, 0, 0))
 
 		for _, mesh := range meshes {
 			mesh.VAO.Bind()
+			mesh.Program.Use()
+			mesh.Program.SetMat4("model", mgl32.Translate3D(0, 0, 0))
+			mesh.Program.SetMat4("view", camera.View)
+			mesh.Program.SetMat4("projection", camera.Projection)
+			mesh.Material.Texture.Bind()
 			gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
+			mesh.Material.Texture.UnBind()
+
 		}
 
 		window.SwapBuffers()
 		glfw.PollEvents()
 		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)
-		program.SetMat4("view", camera.View)
-		program.SetMat4("projection", camera.Projection)
 	}
 }
 

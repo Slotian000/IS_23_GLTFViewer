@@ -7,6 +7,7 @@ import (
 	"github.com/qmuntal/gltf"
 	"math"
 	"openGL/Wrappers"
+	"strings"
 )
 
 type Mesh struct {
@@ -17,10 +18,11 @@ type Mesh struct {
 	Indices       []uint32
 	VAO           Wrappers.VAO
 	Program       Wrappers.Program
+	Material      Material
 }
 
-type Image struct {
-	Data []byte
+type Material struct {
+	Texture Wrappers.Texture
 }
 
 var VertexAttributes = []Wrappers.VertexAttribute{
@@ -37,6 +39,16 @@ func test() []Mesh {
 	}
 	meshes := make([]Mesh, 0, 0)
 	textures := make([]Wrappers.Texture, 0, 0)
+	materials := make([]Material, 0, 0)
+
+	for _, image := range doc.Images {
+		texture, _ := Wrappers.NewTexture("Sources/" + image.URI)
+		textures = append(textures, texture)
+	}
+
+	for _, material := range doc.Materials {
+		materials = append(materials, Material{Texture: textures[material.PBRMetallicRoughness.BaseColorTexture.Index]})
+	}
 
 	for _, node := range doc.Nodes {
 		if node.Mesh != nil {
@@ -58,30 +70,28 @@ func test() []Mesh {
 			}
 			if accessor, ok := attributes["TANGENT"]; ok {
 				mesh.Tangents = Float32Buffer(doc, accessor)
-				key += "T"
+				key += "X"
 			}
 
-			raw := make([]float32, 0, len(mesh.Positions)*4)
-			for i := 0; i*3 < len(mesh.Positions)/3; i++ {
+			raw := make([]float32, 0, 0)
+			for i := 0; i < len(mesh.Indices); i++ {
 				raw = append(raw, mesh.Positions[i*3:i*3+3]...)
-				raw = append(raw, mesh.NormalCoords[i*3:i*3+3]...)
-				raw = append(raw, mesh.TextureCoords[i*2:i*2+2]...)
-				raw = append(raw, mesh.Tangents[i*2:i*2+2]...)
+				if strings.Contains(key, "N") {
+					raw = append(raw, mesh.NormalCoords[i*3:i*3+3]...)
+				}
+				if strings.Contains(key, "N") {
+					raw = append(raw, mesh.TextureCoords[i*2:i*2+2]...)
+				}
+				if strings.Contains(key, "N") {
+					raw = append(raw, mesh.Tangents[i*2:i*2+2]...)
+				}
 			}
-
+			//doc.Meshes[*node.Mesh].Primitives[0].Material
 			mesh.VAO = Wrappers.NewVAOWithEBO(raw, mesh.Indices, gl.STATIC_DRAW, VertexAttributes...)
+			mesh.Program = Programs[key]
+			mesh.Material = materials[*doc.Meshes[*node.Mesh].Primitives[0].Material]
 			meshes = append(meshes, mesh)
 		}
-	}
-	for _, image := range doc.Images {
-		texture, _ := Wrappers.NewTexture("Sources/" + image.URI)
-		texture.Bind()
-		textures = append(textures, texture)
-	}
-
-	for _, material := range doc.Materials {
-		texture := material.PBRMetallicRoughness.BaseColorTexture
-		fmt.Println(texture.Index)
 	}
 
 	return meshes
@@ -106,18 +116,3 @@ func Uint16BufferAsUint32Buffer(doc *gltf.Document, accessor uint32) []uint32 {
 	}
 	return result
 }
-
-/*
-	images := make([]Image, 0, 0)
-	for _, image := range doc.Images {
-		bv := doc.BufferViews[*doc.Accessors[*image.BufferView].BufferView]
-		images = append(images, Image{Data: doc.Buffers[bv.Buffer].Data[bv.ByteOffset : bv.ByteOffset+bv.ByteLength]})
-	}
-
-	for _, material := range doc.Materials{
-		material.
-
-
-	}
-
-*/
