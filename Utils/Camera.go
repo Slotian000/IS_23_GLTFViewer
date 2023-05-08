@@ -39,8 +39,8 @@ func NewCamera(width float32, height float32) Camera {
 		fov:         45,
 		yaw:         -90.0,
 		pitch:       0,
-		speed:       10,
-		sensitivity: 0.2,
+		speed:       2,
+		sensitivity: 1,
 	}
 	return camera
 }

@@ -74,19 +74,29 @@ func DeltaTime() float32 {
 func loop(window *glfw.Window, meshes []Mesh) {
 
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
+	temp := make(map[Wrappers.Program][]Mesh)
+
+	for _, mesh := range meshes {
+		if temp[mesh.Program] == nil {
+			temp[mesh.Program] = make([]Mesh, 0, 0)
+		}
+		temp[mesh.Program] = append(temp[mesh.Program], mesh)
+	}
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		for _, mesh := range meshes {
-			mesh.VAO.Bind()
-			mesh.Program.Use()
-			mesh.Program.SetMat4("model", mgl32.Translate3D(0, 0, 0))
-			mesh.Program.SetMat4("view", camera.View)
-			mesh.Program.SetMat4("projection", camera.Projection)
-			mesh.Material.Texture.Bind()
-			gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
-			mesh.Material.Texture.UnBind()
-
+		for program, slice := range temp {
+			program.Use()
+			program.SetMat4("model", mgl32.Scale3D(10, 10, 10))
+			program.SetMat4("view", camera.View)
+			program.SetMat4("projection", camera.Projection)
+			for _, mesh := range slice {
+				mesh.VAO.Bind()
+				mesh.Material.Texture.Bind()
+				gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
+				mesh.Material.Texture.UnBind()
+			}
 		}
 
 		window.SwapBuffers()

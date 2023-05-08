@@ -33,10 +33,11 @@ var VertexAttributes = []Wrappers.VertexAttribute{
 }
 
 func test() []Mesh {
-	doc, err := gltf.Open("Sources/AnimatedCube.gltf")
+	doc, err := gltf.Open("Sources/Buggy.gltf")
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	meshes := make([]Mesh, 0, 0)
 	textures := make([]Wrappers.Texture, 0, 0)
 	materials := make([]Material, 0, 0)
@@ -74,26 +75,24 @@ func test() []Mesh {
 			}
 
 			raw := make([]float32, 0, 0)
-			for i := 0; i < len(mesh.Indices); i++ {
+			for i := 0; i < len(mesh.Positions)/3; i++ {
 				raw = append(raw, mesh.Positions[i*3:i*3+3]...)
 				if strings.Contains(key, "N") {
 					raw = append(raw, mesh.NormalCoords[i*3:i*3+3]...)
 				}
-				if strings.Contains(key, "N") {
+				if strings.Contains(key, "T") {
 					raw = append(raw, mesh.TextureCoords[i*2:i*2+2]...)
 				}
-				if strings.Contains(key, "N") {
+				if strings.Contains(key, "X") {
 					raw = append(raw, mesh.Tangents[i*2:i*2+2]...)
 				}
 			}
-			//doc.Meshes[*node.Mesh].Primitives[0].Material
 			mesh.VAO = Wrappers.NewVAOWithEBO(raw, mesh.Indices, gl.STATIC_DRAW, VertexAttributes...)
 			mesh.Program = Programs[key]
 			mesh.Material = materials[*doc.Meshes[*node.Mesh].Primitives[0].Material]
 			meshes = append(meshes, mesh)
 		}
 	}
-
 	return meshes
 }
 
