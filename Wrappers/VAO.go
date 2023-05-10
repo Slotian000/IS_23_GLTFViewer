@@ -117,6 +117,5 @@ func NewVAOWithEBO(vertices []float32, indices []uint32, usage uint32, attribute
 
 	addAttributes(attributes, int32(byteStride))
 	result.UnBind()
-
 	return result
 }

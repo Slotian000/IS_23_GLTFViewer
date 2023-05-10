@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/go-gl/mathgl/mgl32"
 	_ "github.com/go-gl/mathgl/mgl32"
 	_ "image/jpeg"
 	_ "image/png"
@@ -29,7 +28,6 @@ func init() {
 }
 
 func main() {
-
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to inifitialize glfw:", err)
 	}
@@ -72,7 +70,6 @@ func DeltaTime() float32 {
 }
 
 func loop(window *glfw.Window, meshes []Mesh) {
-
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
 	temp := make(map[Wrappers.Program][]Mesh)
 
@@ -85,20 +82,18 @@ func loop(window *glfw.Window, meshes []Mesh) {
 
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
 		for program, slice := range temp {
 			program.Use()
-			program.SetMat4("model", mgl32.Scale3D(10, 10, 10))
 			program.SetMat4("view", camera.View)
 			program.SetMat4("projection", camera.Projection)
 			for _, mesh := range slice {
 				mesh.VAO.Bind()
 				mesh.Material.Texture.Bind()
+				program.SetMat4("model", mesh.Model)
 				gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
 				mesh.Material.Texture.UnBind()
 			}
 		}
-
 		window.SwapBuffers()
 		glfw.PollEvents()
 		camera.Update(DeltaTime(), float32(CursorX), float32(CursorY), float32(ScrollY), Active, Bindings)

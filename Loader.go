@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/qmuntal/gltf"
 	"math"
 	"openGL/Wrappers"
@@ -19,6 +20,10 @@ type Mesh struct {
 	VAO           Wrappers.VAO
 	Program       Wrappers.Program
 	Material      Material
+	Translation   []float32
+	Rotation      []float32
+	Scale         []float32
+	Model         mgl32.Mat4
 }
 
 type Material struct {
@@ -33,7 +38,7 @@ var VertexAttributes = []Wrappers.VertexAttribute{
 }
 
 func test() []Mesh {
-	doc, err := gltf.Open("Sources/Buggy.gltf")
+	doc, err := gltf.Open("Sources/BoomBoxWithAxes.gltf")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -48,14 +53,25 @@ func test() []Mesh {
 	}
 
 	for _, material := range doc.Materials {
-		materials = append(materials, Material{Texture: textures[material.PBRMetallicRoughness.BaseColorTexture.Index]})
+		if material.PBRMetallicRoughness.BaseColorTexture != nil {
+			materials = append(materials, Material{Texture: textures[material.PBRMetallicRoughness.BaseColorTexture.Index]})
+		} else {
+			x := material.PBRMetallicRoughness.BaseColorFactor
+			materials = append(materials, Material{Texture: Wrappers.NewSolidTexture(x[0], x[1], x[2], x[3])})
+		}
 	}
 
 	for _, node := range doc.Nodes {
 		if node.Mesh != nil {
 			attributes := doc.Meshes[*node.Mesh].Primitives[0].Attributes
-			mesh := Mesh{Indices: Uint16BufferAsUint32Buffer(doc, *doc.Meshes[*node.Mesh].Primitives[0].Indices)}
 			key := ""
+			mesh := Mesh{
+				Indices:     Uint16BufferAsUint32Buffer(doc, *doc.Meshes[*node.Mesh].Primitives[0].Indices),
+				Translation: node.Translation[:],
+				Rotation:    node.Rotation[:],
+				Scale:       node.Scale[:],
+				Model:       translate(node.Translation, node.Rotation, node.Scale),
+			}
 
 			if accessor, ok := attributes["POSITION"]; ok {
 				mesh.Positions = Float32Buffer(doc, accessor)
@@ -114,4 +130,13 @@ func Uint16BufferAsUint32Buffer(doc *gltf.Document, accessor uint32) []uint32 {
 		result = append([]uint32{uint32(binary.BigEndian.Uint16([]byte{buffer[i], buffer[i-1]}))}, result...)
 	}
 	return result
+}
+
+func translate(translation [3]float32, rotation [4]float32, scale [3]float32) mgl32.Mat4 {
+	model := mgl32.Translate3D(translation[0], translation[0], translation[0])
+	model.Mul4(mgl32.HomogRotate3DX(rotation[0]))
+	model.Mul4(mgl32.HomogRotate3DY(rotation[1]))
+	model.Mul4(mgl32.HomogRotate3DZ(rotation[2]))
+	model.Mul4(mgl32.Scale3D(10000, 10000, 10000))
+	return model
 }
