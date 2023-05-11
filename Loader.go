@@ -16,13 +16,13 @@ type Mesh struct {
 	NormalCoords  []float32
 	TextureCoords []float32
 	Tangents      []float32
+	Translation   []float32
+	Rotation      []float32
+	Scale         []float32
 	Indices       []uint32
 	VAO           Wrappers.VAO
 	Program       Wrappers.Program
 	Material      Material
-	Translation   []float32
-	Rotation      []float32
-	Scale         []float32
 	Model         mgl32.Mat4
 }
 
@@ -31,10 +31,10 @@ type Material struct {
 }
 
 var VertexAttributes = []Wrappers.VertexAttribute{
-	Wrappers.NewVertexAttribute(3, gl.FLOAT, false), // Position
-	Wrappers.NewVertexAttribute(3, gl.FLOAT, false), // Normal
-	Wrappers.NewVertexAttribute(2, gl.FLOAT, false), // Texture
-	Wrappers.NewVertexAttribute(2, gl.FLOAT, false), // Tangent
+	Wrappers.NewVertexAttribute(3, gl.FLOAT, false), //Position
+	Wrappers.NewVertexAttribute(3, gl.FLOAT, false), //Normal
+	Wrappers.NewVertexAttribute(2, gl.FLOAT, false), //Texture
+	Wrappers.NewVertexAttribute(2, gl.FLOAT, false), //Tangent
 }
 
 func test() []Mesh {
@@ -42,7 +42,6 @@ func test() []Mesh {
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	meshes := make([]Mesh, 0, 0)
 	textures := make([]Wrappers.Texture, 0, 0)
 	materials := make([]Material, 0, 0)
@@ -72,7 +71,6 @@ func test() []Mesh {
 				Scale:       node.Scale[:],
 				Model:       translate(node.Translation, node.Rotation, node.Scale),
 			}
-
 			if accessor, ok := attributes["POSITION"]; ok {
 				mesh.Positions = Float32Buffer(doc, accessor)
 				key += "P"
@@ -133,10 +131,10 @@ func Uint16BufferAsUint32Buffer(doc *gltf.Document, accessor uint32) []uint32 {
 }
 
 func translate(translation [3]float32, rotation [4]float32, scale [3]float32) mgl32.Mat4 {
-	model := mgl32.Translate3D(translation[0], translation[0], translation[0])
+	model := mgl32.Scale3D(scale[0], scale[1], scale[2])
+	model.Mul4(mgl32.Translate3D(translation[0], translation[0], translation[0]))
 	model.Mul4(mgl32.HomogRotate3DX(rotation[0]))
 	model.Mul4(mgl32.HomogRotate3DY(rotation[1]))
 	model.Mul4(mgl32.HomogRotate3DZ(rotation[2]))
-	model.Mul4(mgl32.Scale3D(10000, 10000, 10000))
 	return model
 }

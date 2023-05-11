@@ -5,7 +5,7 @@ in vec2 TextureCoord;
 out vec4 FragColor;
 
 uniform sampler2D base;
-uniform sampler2D normalMap;
+//uniform sampler2D normalMap;
 
 void main()
 {

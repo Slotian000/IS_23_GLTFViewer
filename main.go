@@ -72,6 +72,7 @@ func DeltaTime() float32 {
 func loop(window *glfw.Window, meshes []Mesh) {
 	camera := Utils.NewCamera(WindowWidth, WindowHeight)
 	temp := make(map[Wrappers.Program][]Mesh)
+	texture, _ := Wrappers.NewTexture("Sources/Avocado_roughnessMetallic.png")
 
 	for _, mesh := range meshes {
 		if temp[mesh.Program] == nil {
@@ -88,10 +89,10 @@ func loop(window *glfw.Window, meshes []Mesh) {
 			program.SetMat4("projection", camera.Projection)
 			for _, mesh := range slice {
 				mesh.VAO.Bind()
-				mesh.Material.Texture.Bind()
+				texture.Bind()
+				gl.Uniform1i(gl.GetUniformLocation(program.ID, gl.Str("base\x00")), 0) // < --- --
 				program.SetMat4("model", mesh.Model)
 				gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
-				mesh.Material.Texture.UnBind()
 			}
 		}
 		window.SwapBuffers()
