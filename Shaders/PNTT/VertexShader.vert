@@ -6,7 +6,8 @@ layout (location =2) in vec2 baseCoord;
 layout (location =3) in vec2 normalCoord;
 
 out vec2 BaseCoord;
-out vec2 NormalCoord;
+//out vec2 NormalCoord;
+//out vec3 temp;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -16,5 +17,6 @@ void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0f);
     BaseCoord = baseCoord;
-    NormalCoord = normalCoord;
+    //NormalCoord = normalCoord;
+    //temp = position;
 }

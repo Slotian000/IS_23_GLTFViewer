@@ -38,7 +38,7 @@ var VertexAttributes = []Wrappers.VertexAttribute{
 }
 
 func test() []Mesh {
-	doc, err := gltf.Open("Sources/BoomBoxWithAxes.gltf")
+	doc, err := gltf.Open("Sources/Duck.gltf")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -89,16 +89,16 @@ func test() []Mesh {
 			}
 
 			raw := make([]float32, 0, 0)
-			for i := 0; i < len(mesh.Positions)/3; i++ {
-				raw = append(raw, mesh.Positions[i*3:i*3+3]...)
+			for i, j := 0, 0; i < len(mesh.Positions)-3; i, j = i+3, j+2 {
+				raw = append(raw, mesh.Positions[i:i+3]...)
 				if strings.Contains(key, "N") {
-					raw = append(raw, mesh.NormalCoords[i*3:i*3+3]...)
+					raw = append(raw, mesh.NormalCoords[i:i+3]...)
 				}
 				if strings.Contains(key, "T") {
-					raw = append(raw, mesh.TextureCoords[i*2:i*2+2]...)
+					raw = append(raw, mesh.TextureCoords[j:j+2]...)
 				}
 				if strings.Contains(key, "X") {
-					raw = append(raw, mesh.Tangents[i*2:i*2+2]...)
+					raw = append(raw, mesh.Tangents[j:j+2]...)
 				}
 			}
 			mesh.VAO = Wrappers.NewVAOWithEBO(raw, mesh.Indices, gl.STATIC_DRAW, VertexAttributes...)
@@ -114,7 +114,7 @@ func Float32Buffer(doc *gltf.Document, accessor uint32) []float32 {
 	bv := doc.BufferViews[*doc.Accessors[accessor].BufferView]
 	buffer := doc.Buffers[bv.Buffer].Data[bv.ByteOffset : bv.ByteOffset+bv.ByteLength]
 	result := make([]float32, 0, len(buffer)/4)
-	for i := 0; i < len(buffer)-4; i += 4 {
+	for i := 0; i < len(buffer); i += 4 {
 		result = append(result, math.Float32frombits(binary.LittleEndian.Uint32(buffer[i:i+4])))
 	}
 	return result
@@ -131,7 +131,8 @@ func Uint16BufferAsUint32Buffer(doc *gltf.Document, accessor uint32) []uint32 {
 }
 
 func translate(translation [3]float32, rotation [4]float32, scale [3]float32) mgl32.Mat4 {
-	model := mgl32.Scale3D(scale[0], scale[1], scale[2])
+	//model := mgl32.Scale3D(scale[0], scale[1], scale[2])
+	model := mgl32.Scale3D(10, 10, 10)
 	model.Mul4(mgl32.Translate3D(translation[0], translation[0], translation[0]))
 	model.Mul4(mgl32.HomogRotate3DX(rotation[0]))
 	model.Mul4(mgl32.HomogRotate3DY(rotation[1]))

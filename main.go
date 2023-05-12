@@ -88,10 +88,10 @@ func loop(window *glfw.Window, meshes []Mesh) {
 			program.SetMat4("view", camera.View)
 			program.SetMat4("projection", camera.Projection)
 			for _, mesh := range slice {
-				mesh.VAO.Bind()
-				texture.Bind()
 				gl.Uniform1i(gl.GetUniformLocation(program.ID, gl.Str("base\x00")), 0) // < --- --
 				program.SetMat4("model", mesh.Model)
+				mesh.VAO.Bind()
+				texture.Bind()
 				gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.VAO.Count), gl.UNSIGNED_INT, 0)
 			}
 		}

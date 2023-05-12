@@ -29,7 +29,7 @@ func texParameters() {
 func NewTexture(path string) (Texture, error) {
 	texture := Texture{}
 
-	imgFile, err := os.Open("Sources/wall.jpg")
+	imgFile, err := os.Open(path)
 	defer imgFile.Close()
 	if err != nil {
 		return Texture{}, err
