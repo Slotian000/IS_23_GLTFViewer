@@ -3,11 +3,10 @@
 layout (location =0) in vec3 position;
 layout (location =1) in vec3 normal;
 layout (location =2) in vec2 baseCoord;
-layout (location =3) in vec2 normalCoord;
+layout (location =3) in vec3 normalCoord;
 
 out vec2 BaseCoord;
-//out vec2 NormalCoord;
-//out vec3 temp;
+//out vec3 NormalCoord;
 
 uniform mat4 model;
 uniform mat4 view;
