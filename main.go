@@ -10,6 +10,7 @@ import (
 	"log"
 	"openGL/Utils"
 	"openGL/Wrappers"
+	"os"
 	"runtime"
 )
 
@@ -39,7 +40,7 @@ func main() {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.Resizable, glfw.True)
-	window, err := glfw.CreateWindow(WindowWidth, WindowHeight, "Hello!", nil, nil)
+	window, err := glfw.CreateWindow(WindowWidth, WindowHeight, "IS Final Project", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -57,9 +58,9 @@ func main() {
 	gl.ClearColor(0.2, 0.5, 0.5, 1.0)
 	Programs["PN"] = LoadProgram("Shaders/PN")
 	Programs["PNT"] = LoadProgram("Shaders/PNT")
-	Programs["PNTX"] = LoadProgram("Shaders/PNTT")
+	Programs["PNTX"] = LoadProgram("Shaders/PNTX")
 
-	meshes := test()
+	meshes := test(os.Args[1])
 	loop(window, meshes)
 }
 
@@ -83,12 +84,13 @@ func loop(window *glfw.Window, meshes []Mesh) {
 
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
 		for program, slice := range temp {
 			program.Use()
 			program.SetMat4("view", camera.View)
 			program.SetMat4("projection", camera.Projection)
 			for _, mesh := range slice {
-				gl.Uniform1i(gl.GetUniformLocation(program.ID, gl.Str("base\x00")), 0) // < --- --
+				//gl.Uniform1i(gl.GetUniformLocation(program.ID, gl.Str("base\x00")), 0) // < --- --
 				program.SetMat4("model", mesh.Model)
 				mesh.VAO.Bind()
 				mesh.Material.Texture.Bind()

@@ -42,8 +42,8 @@ var VertexAttributes = []Wrappers.VertexAttribute{
 	Wrappers.NewVertexAttribute(3, gl.FLOAT, false), //Tangent
 }
 
-func test() []Mesh {
-	doc, err := gltf.Open("Sources/Duck.gltf")
+func test(path string) []Mesh {
+	doc, err := gltf.Open(path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -146,8 +146,8 @@ func Uint16BufferAsUint32Buffer(doc *gltf.Document, a uint32) []uint32 {
 }
 
 func translate(translation [3]float32, rotation [4]float32, scale [3]float32) mgl32.Mat4 {
-	//model := mgl32.Scale3D(scale[0], scale[1], scale[2])
-	model := mgl32.Scale3D(scale[0]*.01, scale[1]*.01, scale[2]*.01)
+	model := mgl32.Scale3D(scale[0], scale[1], scale[2])
+	//model := mgl32.Scale3D(scale[0]*.01, scale[1]*.01, scale[2]*.01)
 	//model := mgl32.Scale3D(scale[0]*10, scale[1]*10, scale[2]*10)
 	//model := mgl32.Scale3D(1, 1, 1)
 	//model := mgl32.Scale3D(10, 10, 10)

@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -52,8 +53,13 @@ func (c *Camera) Update(deltaTime float32, cursorX float32, cursorY float32, scr
 
 	c.yaw += xOffset
 	c.pitch = MinMax(-89, c.pitch+yOffset, 89)
-	c.fov = MinMax(1, c.fov-scrollY, 120)
+	c.fov = MinMax(1, c.fov-scrollY, 90)
 
+	if Active[Bindings["WireFrame"]] {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	} else {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+	}
 	if Active[Bindings["CameraForward"]] {
 		c.CameraPos = c.CameraPos.Add(c.cameraFront.Mul(deltaTime * c.speed))
 	}
@@ -67,7 +73,7 @@ func (c *Camera) Update(deltaTime float32, cursorX float32, cursorY float32, scr
 		c.CameraPos = c.CameraPos.Add(c.cameraFront.Cross(c.cameraUp).Normalize().Mul(deltaTime * c.speed))
 	}
 	if Active[Bindings["CameraSprint"]] {
-		c.fov += 20
+		c.fov = 120
 		c.speed = 10
 	} else {
 		c.speed = 5
