@@ -3,5 +3,6 @@
   "CameraForward": 87,
   "CameraLeft": 65,
   "CameraRight": 68,
-  "CameraSprint" : 340
+  "CameraSprint" : 340,
+  "WireFrame" : 82
 }

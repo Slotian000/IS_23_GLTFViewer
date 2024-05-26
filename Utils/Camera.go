@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -39,7 +40,7 @@ func NewCamera(width float32, height float32) Camera {
 		fov:         45,
 		yaw:         -90.0,
 		pitch:       0,
-		speed:       1,
+		speed:       5,
 		sensitivity: .05,
 	}
 	return camera
@@ -52,8 +53,13 @@ func (c *Camera) Update(deltaTime float32, cursorX float32, cursorY float32, scr
 
 	c.yaw += xOffset
 	c.pitch = MinMax(-89, c.pitch+yOffset, 89)
-	c.fov = MinMax(1, c.fov-scrollY, 120)
+	c.fov = MinMax(1, c.fov-scrollY, 90)
 
+	if Active[Bindings["WireFrame"]] {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	} else {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+	}
 	if Active[Bindings["CameraForward"]] {
 		c.CameraPos = c.CameraPos.Add(c.cameraFront.Mul(deltaTime * c.speed))
 	}
@@ -67,10 +73,10 @@ func (c *Camera) Update(deltaTime float32, cursorX float32, cursorY float32, scr
 		c.CameraPos = c.CameraPos.Add(c.cameraFront.Cross(c.cameraUp).Normalize().Mul(deltaTime * c.speed))
 	}
 	if Active[Bindings["CameraSprint"]] {
-		c.fov += 20
-		c.speed = 2
+		c.fov = 120
+		c.speed = 10
 	} else {
-		c.speed = 1
+		c.speed = 5
 	}
 
 	c.cameraFront = mgl32.Vec3{
@@ -80,5 +86,5 @@ func (c *Camera) Update(deltaTime float32, cursorX float32, cursorY float32, scr
 	}.Normalize()
 
 	c.View = mgl32.LookAtV(c.CameraPos, c.CameraPos.Add(c.cameraFront), c.cameraUp)
-	c.Projection = mgl32.Perspective(mgl32.DegToRad(c.fov), c.aspectRatio, 0.0001, 100.0)
+	c.Projection = mgl32.Perspective(mgl32.DegToRad(c.fov), c.aspectRatio, 0.1, 1000.0)
 }

@@ -13,10 +13,12 @@ type Texture struct {
 
 func (t *Texture) Bind() {
 	gl.BindTexture(gl.TEXTURE_2D, t.ID)
+
 }
 
 func (t *Texture) UnBind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
+
 }
 
 func texParameters() {

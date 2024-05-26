@@ -103,7 +103,7 @@ func NewVAOWithEBO(vertices []float32, indices []uint32, usage uint32, attribute
 		panic("Vertices does not match stride")
 	}
 
-	result := VAO{Count: len(vertices) / elementsStride}
+	result := VAO{Count: len(vertices)}
 	gl.GenVertexArrays(1, &result.ID)
 	gl.GenBuffers(1, &result.vertexBufferID)
 	gl.GenBuffers(1, &result.elementBufferID)
