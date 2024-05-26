@@ -13,7 +13,7 @@ file to a window.
  - Scroll mouse to zoom in or out
  - Hold R to view wired Frame 
 
-## Example Usage 
+## Example Usage  
 
 ### Camera 
 <img src="Images/camera.png" alt="camera">
